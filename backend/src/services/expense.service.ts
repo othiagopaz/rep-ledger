@@ -30,6 +30,8 @@ export async function createExpense(data: {
   valor: number;
   local?: string;
   forecast?: boolean;
+  data?: Date;
+  categoria?: string;
   budgetId: number;
 }) {
   // Verify budget exists
@@ -44,6 +46,8 @@ export async function createExpense(data: {
       valor: new Prisma.Decimal(data.valor),
       local: data.local ?? "",
       forecast: data.forecast ?? false,
+      data: data.data ?? new Date(),
+      categoria: data.categoria ?? "",
       budgetId: data.budgetId,
     },
     include: {
@@ -61,6 +65,8 @@ export async function updateExpense(
     valor: number;
     local: string;
     forecast: boolean;
+    data: Date;
+    categoria: string;
     budgetId: number;
   }>
 ) {
