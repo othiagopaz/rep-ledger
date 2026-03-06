@@ -33,7 +33,6 @@ export default function ExpenseForm({
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors },
   } = useForm<ExpenseInput>({
     defaultValues: defaultValues ?? { forecast: false, data: todayISO() },
