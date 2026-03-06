@@ -17,6 +17,7 @@ export const createExpenseSchema = z.object({
   valor: z.number().positive("Valor must be positive"),
   local: z.string().optional().default(""),
   forecast: z.boolean().optional().default(false),
+  data: z.string().optional().transform((v) => v ? new Date(v) : undefined),
   budgetId: z.number().int().positive("Budget ID is required"),
 });
 
@@ -25,6 +26,7 @@ export const updateExpenseSchema = z.object({
   valor: z.number().positive().optional(),
   local: z.string().optional(),
   forecast: z.boolean().optional(),
+  data: z.string().optional().transform((v) => v ? new Date(v) : undefined),
   budgetId: z.number().int().positive().optional(),
 });
 

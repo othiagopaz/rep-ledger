@@ -3,6 +3,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Libbs Sans"', '"Myriad Pro"', 'Myriad', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
         brand: {
           50: '#eafbeb',

@@ -55,6 +55,7 @@ export interface ExpenseInput {
   valor: number;
   local: string;
   forecast: boolean;
+  data: string;
   budgetId: number;
 }
 

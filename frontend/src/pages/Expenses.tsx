@@ -161,6 +161,7 @@ export default function Expenses() {
                       valor: Number(editing.valor),
                       local: editing.local,
                       forecast: editing.forecast,
+                      data: new Date(editing.data).toISOString().split("T")[0],
                       budgetId: editing.budgetId,
                     }
                   : undefined

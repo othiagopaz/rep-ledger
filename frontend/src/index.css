@@ -1,3 +1,39 @@
+@font-face {
+  font-family: 'Libbs Sans';
+  src: url('/fonts/LibbsSans-Light.woff2') format('woff2'),
+       url('/fonts/LibbsSans-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Libbs Sans';
+  src: url('/fonts/LibbsSans-Regular.woff2') format('woff2'),
+       url('/fonts/LibbsSans-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Libbs Sans';
+  src: url('/fonts/LibbsSans-Medium.woff2') format('woff2'),
+       url('/fonts/LibbsSans-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Libbs Sans';
+  src: url('/fonts/LibbsSans-Bold.woff2') format('woff2'),
+       url('/fonts/LibbsSans-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
