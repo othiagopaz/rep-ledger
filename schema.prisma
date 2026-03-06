@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Budget {
+  id           Int       @id @default(autoincrement())
+  franquia     String
+  produto      String    @default("")
+  tema         String    @default("")
+  speaker1     String    @default("")
+  investimento Decimal   @db.Decimal(10, 2)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  expenses     Expense[]
+
+  @@map("budgets")
+}
+
+model Expense {
+  id           Int      @id @default(autoincrement())
+  participante String
+  valor        Decimal  @db.Decimal(10, 2)
+  local        String   @default("")
+  forecast     Boolean  @default(false)
+  data         DateTime @default(now())
+  budgetId     Int      @map("budget_id")
+  budget       Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([budgetId])
+  @@index([createdAt])
+  @@map("expenses")
+}

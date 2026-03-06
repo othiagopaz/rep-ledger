@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "budgets" ALTER COLUMN "produto" SET DEFAULT '',
+ALTER COLUMN "tema" SET DEFAULT '',
+ALTER COLUMN "speaker1" SET DEFAULT '';

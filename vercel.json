@@ -1,0 +1,15 @@
+{
+  "installCommand": "cd backend && npm install && npx prisma generate --schema=../schema.prisma && cd ../frontend && npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "backend/api/**/*.ts": {
+      "runtime": "@vercel/node@3"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/backend/api/index.ts" },
+    { "source": "/health", "destination": "/backend/api/index.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
