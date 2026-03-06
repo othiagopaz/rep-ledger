@@ -28,6 +28,7 @@ model Expense {
   local        String   @default("")
   forecast     Boolean  @default(false)
   data         DateTime @default(now())
+  categoria    String   @default("")
   budgetId     Int      @map("budget_id")
   budget       Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now()) @map("created_at")

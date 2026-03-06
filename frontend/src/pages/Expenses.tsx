@@ -18,6 +18,7 @@ export default function Expenses() {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
+  const [draftValues, setDraftValues] = useState<ExpenseInput | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("all");
 
@@ -50,7 +51,32 @@ export default function Expenses() {
   }, [expenses, budgetFilter, viewMode, search]);
 
   const handleCreate = (data: ExpenseInput) => {
-    createExpense.mutate(data, { onSuccess: () => setShowForm(false) });
+    createExpense.mutate(data, { onSuccess: () => { setShowForm(false); setDraftValues(undefined); } });
+  };
+
+  const handleSaveAndDuplicate = (data: ExpenseInput) => {
+    const draft = { ...data };
+    createExpense.mutate(data, {
+      onSuccess: () => {
+        setDraftValues(draft);
+        setShowForm(true);
+        setEditing(null);
+      },
+    });
+  };
+
+  const handleDuplicateFromTable = (exp: Expense) => {
+    setDraftValues({
+      participante: exp.participante,
+      valor: Number(exp.valor),
+      local: exp.local,
+      forecast: exp.forecast,
+      data: new Date(exp.data).toISOString().split("T")[0],
+      categoria: exp.categoria || "",
+      budgetId: exp.budgetId,
+    });
+    setEditing(null);
+    setShowForm(true);
   };
 
   const handleUpdate = (data: ExpenseInput) => {
@@ -95,7 +121,7 @@ export default function Expenses() {
           )}
         </div>
         <button
-          onClick={() => { setShowForm(true); setEditing(null); }}
+          onClick={() => { setShowForm(true); setEditing(null); setDraftValues(undefined); }}
           className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700"
         >
           + Nova Despesa
@@ -151,9 +177,11 @@ export default function Expenses() {
               {editing ? "Editar Despesa" : "Nova Despesa"}
             </h2>
             <ExpenseForm
+              key={draftValues ? JSON.stringify(draftValues) : editing?.id ?? "new"}
               budgets={budgets}
               onSubmit={editing ? handleUpdate : handleCreate}
-              onCancel={() => { setShowForm(false); setEditing(null); }}
+              onSaveAndDuplicate={!editing ? handleSaveAndDuplicate : undefined}
+              onCancel={() => { setShowForm(false); setEditing(null); setDraftValues(undefined); }}
               defaultValues={
                 editing
                   ? {
@@ -162,10 +190,22 @@ export default function Expenses() {
                       local: editing.local,
                       forecast: editing.forecast,
                       data: new Date(editing.data).toISOString().split("T")[0],
+                      categoria: editing.categoria || "",
                       budgetId: editing.budgetId,
                     }
-                  : undefined
+                  : draftValues
+                    ? {
+                        participante: draftValues.participante,
+                        valor: draftValues.valor,
+                        local: draftValues.local,
+                        forecast: draftValues.forecast,
+                        data: draftValues.data ?? "",
+                        categoria: draftValues.categoria ?? "",
+                        budgetId: draftValues.budgetId,
+                      }
+                    : undefined
               }
+              isEditing={!!editing}
               isLoading={createExpense.isPending || updateExpense.isPending}
             />
           </div>
@@ -182,6 +222,7 @@ export default function Expenses() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor</th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tipo</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Local</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Categoria</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Budget</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Data</th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
@@ -190,7 +231,7 @@ export default function Expenses() {
             <tbody className="divide-y divide-gray-100">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-10 text-center text-gray-400">
                     Nenhuma despesa encontrada
                   </td>
                 </tr>
@@ -224,6 +265,9 @@ export default function Expenses() {
                     {exp.local || "—"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">
+                    {exp.categoria || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">
                     {exp.budget?.franquia} - {exp.budget?.produto}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">
@@ -234,14 +278,25 @@ export default function Expenses() {
                       <button
                         onClick={() => setEditing(exp)}
                         className="p-2 text-gray-400 hover:text-brand-600 rounded-lg hover:bg-gray-100"
+                        title="Editar"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
                       <button
+                        onClick={() => handleDuplicateFromTable(exp)}
+                        className="p-2 text-gray-400 hover:text-brand-600 rounded-lg hover:bg-gray-100"
+                        title="Duplicar"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                      <button
                         onClick={() => handleDelete(exp.id)}
                         className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
+                        title="Excluir"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

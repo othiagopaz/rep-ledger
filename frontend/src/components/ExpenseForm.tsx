@@ -5,15 +5,18 @@ interface Props {
   budgets: Budget[];
   onSubmit: (data: ExpenseInput) => void;
   onCancel: () => void;
+  onSaveAndDuplicate?: (data: ExpenseInput) => void;
   defaultValues?: {
     participante: string;
     valor: number;
     local: string;
     forecast: boolean;
     data: string;
+    categoria: string;
     budgetId: number;
   };
   isLoading?: boolean;
+  isEditing?: boolean;
 }
 
 const todayISO = () => new Date().toISOString().split("T")[0];
@@ -22,12 +25,15 @@ export default function ExpenseForm({
   budgets,
   onSubmit,
   onCancel,
+  onSaveAndDuplicate,
   defaultValues,
   isLoading,
+  isEditing,
 }: Props) {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<ExpenseInput>({
     defaultValues: defaultValues ?? { forecast: false, data: todayISO() },
@@ -94,6 +100,16 @@ export default function ExpenseForm({
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
+          Categoria
+        </label>
+        <input
+          {...register("categoria")}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          placeholder="ex: Hospedagem, Transporte, Alimentação"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Budget
         </label>
         <select
@@ -133,6 +149,16 @@ export default function ExpenseForm({
         >
           Cancelar
         </button>
+        {!isEditing && onSaveAndDuplicate && (
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={handleSubmit((data) => onSaveAndDuplicate(data))}
+            className="px-4 py-2 text-sm font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 disabled:opacity-50"
+          >
+            {isLoading ? "Salvando..." : "Salvar e Duplicar"}
+          </button>
+        )}
         <button
           type="submit"
           disabled={isLoading}
@@ -140,7 +166,7 @@ export default function ExpenseForm({
         >
           {isLoading
             ? "Salvando..."
-            : defaultValues
+            : isEditing
               ? "Atualizar"
               : "Adicionar"}
         </button>

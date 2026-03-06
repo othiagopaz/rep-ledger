@@ -18,6 +18,7 @@ export const createExpenseSchema = z.object({
   local: z.string().optional().default(""),
   forecast: z.boolean().optional().default(false),
   data: z.string().optional().transform((v) => v ? new Date(v) : undefined),
+  categoria: z.string().optional().default(""),
   budgetId: z.number().int().positive("Budget ID is required"),
 });
 
@@ -27,6 +28,7 @@ export const updateExpenseSchema = z.object({
   local: z.string().optional(),
   forecast: z.boolean().optional(),
   data: z.string().optional().transform((v) => v ? new Date(v) : undefined),
+  categoria: z.string().optional(),
   budgetId: z.number().int().positive().optional(),
 });
 

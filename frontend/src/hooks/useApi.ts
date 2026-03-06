@@ -36,6 +36,7 @@ export interface Expense {
   local: string;
   forecast: boolean;
   data: string;
+  categoria: string;
   budgetId: number;
   createdAt: string;
   updatedAt: string;
@@ -56,6 +57,7 @@ export interface ExpenseInput {
   local: string;
   forecast: boolean;
   data: string;
+  categoria: string;
   budgetId: number;
 }
 
