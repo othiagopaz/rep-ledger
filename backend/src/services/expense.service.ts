@@ -84,3 +84,15 @@ export async function deleteExpense(id: number) {
   await getExpenseById(id);
   return prisma.expense.delete({ where: { id } });
 }
+
+export async function getUniqueSuggestions(
+  field: "participante" | "local" | "categoria"
+): Promise<string[]> {
+  const results = await prisma.expense.findMany({
+    where: { [field]: { not: "" } },
+    select: { [field]: true },
+    distinct: [field],
+    orderBy: { [field]: "asc" },
+  });
+  return results.map((r) => r[field] as string);
+}

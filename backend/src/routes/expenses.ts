@@ -19,6 +19,22 @@ router.get(
 );
 
 router.get(
+  "/suggestions/:field",
+  asyncHandler(async (req, res) => {
+    const field = req.params.field;
+    const allowed = ["participante", "local", "categoria"];
+    if (!allowed.includes(field)) {
+      res.status(400).json({ error: "Invalid field. Must be one of: participante, local, categoria" });
+      return;
+    }
+    const suggestions = await expenseService.getUniqueSuggestions(
+      field as "participante" | "local" | "categoria"
+    );
+    res.json(suggestions);
+  })
+);
+
+router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const expense = await expenseService.getExpenseById(Number(req.params.id));

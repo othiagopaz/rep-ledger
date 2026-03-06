@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import type { ExpenseInput, Budget } from "../hooks/useApi";
+import { useExpenseSuggestions } from "../hooks/useApi";
+import ComboboxField from "./ComboboxField";
 
 interface Props {
   budgets: Budget[];
@@ -45,11 +47,16 @@ export default function ExpenseForm({
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
     trigger,
   } = useForm<ExpenseInput>({
     defaultValues: defaultValues ?? { forecast: false, data: todayISO() },
   });
+
+  const { data: participanteSuggestions = [] } = useExpenseSuggestions("participante");
+  const { data: localSuggestions = [] } = useExpenseSuggestions("local");
+  const { data: categoriaSuggestions = [] } = useExpenseSuggestions("categoria");
 
   const totalSteps = STEPS.length;
 
@@ -146,21 +153,17 @@ export default function ExpenseForm({
       {/* Step 0: Participante + Valor */}
       {step === 0 && (
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Participante
-            </label>
-            <input
-              {...registerWithRef("participante", { required: "Obrigatório" })}
-              className={inputClass}
-              placeholder="ex: João Mendes"
-              onKeyDown={(e) => handleKeyDown(e, 0)}
-              autoComplete="off"
-            />
-            {errors.participante && (
-              <p className={errorClass}>{errors.participante.message}</p>
-            )}
-          </div>
+          <ComboboxField
+            name="participante"
+            control={control}
+            rules={{ required: "Obrigatório" }}
+            suggestions={participanteSuggestions}
+            label="Participante"
+            placeholder="ex: João Mendes"
+            error={errors.participante}
+            onKeyDown={(e) => handleKeyDown(e, 0)}
+            inputRef={(el) => { inputRefs.current["participante"] = el; }}
+          />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Valor (R$)
@@ -188,30 +191,26 @@ export default function ExpenseForm({
       {/* Step 1: Local + Categoria */}
       {step === 1 && (
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Local
-            </label>
-            <input
-              {...registerWithRef("local")}
-              className={inputClass}
-              placeholder="ex: São Paulo"
-              onKeyDown={(e) => handleKeyDown(e, 0)}
-              autoComplete="off"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Categoria
-            </label>
-            <input
-              {...registerWithRef("categoria")}
-              className={inputClass}
-              placeholder="ex: Hospedagem, Transporte, Alimentação"
-              onKeyDown={(e) => handleKeyDown(e, 1)}
-              autoComplete="off"
-            />
-          </div>
+          <ComboboxField
+            name="local"
+            control={control}
+            suggestions={localSuggestions}
+            label="Local"
+            placeholder="ex: São Paulo"
+            error={errors.local}
+            onKeyDown={(e) => handleKeyDown(e, 0)}
+            inputRef={(el) => { inputRefs.current["local"] = el; }}
+          />
+          <ComboboxField
+            name="categoria"
+            control={control}
+            suggestions={categoriaSuggestions}
+            label="Categoria"
+            placeholder="ex: Hospedagem, Transporte, Alimentação"
+            error={errors.categoria}
+            onKeyDown={(e) => handleKeyDown(e, 1)}
+            inputRef={(el) => { inputRefs.current["categoria"] = el; }}
+          />
         </div>
       )}
 

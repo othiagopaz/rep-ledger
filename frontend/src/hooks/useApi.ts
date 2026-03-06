@@ -137,6 +137,15 @@ export function useDeleteBudget() {
   });
 }
 
+// Expense suggestions
+export function useExpenseSuggestions(field: "participante" | "local" | "categoria") {
+  return useQuery<string[]>({
+    queryKey: ["expense-suggestions", field],
+    queryFn: () => apiFetch(`/api/expenses/suggestions/${field}`),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 // Expense hooks
 export function useExpenses() {
   return useQuery<Expense[]>({
