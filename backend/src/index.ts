@@ -3,6 +3,7 @@ import cors from "cors";
 import budgetRoutes from "./routes/budgets";
 import expenseRoutes from "./routes/expenses";
 import analyticsRoutes from "./routes/analytics";
+import templateRoutes from "./routes/templates";
 import { errorHandler } from "./utils/errors";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use((req, _res, next) => {
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/templates", templateRoutes);
 
 // Health check
 app.get("/health", (_req, res) => {

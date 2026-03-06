@@ -61,6 +61,30 @@ export interface ExpenseInput {
   budgetId: number;
 }
 
+export interface ExpenseTemplate {
+  id: number;
+  name: string;
+  participante: string | null;
+  valor: string | number | null;
+  local: string | null;
+  forecast: boolean | null;
+  categoria: string | null;
+  budgetId: number | null;
+  createdAt: string;
+  updatedAt: string;
+  budget?: { id: number; franquia: string; produto: string; tema: string } | null;
+}
+
+export interface TemplateInput {
+  name: string;
+  participante?: string;
+  valor?: number;
+  local?: string;
+  forecast?: boolean;
+  categoria?: string;
+  budgetId?: number;
+}
+
 // Budget hooks
 export function useBudgets() {
   return useQuery<Budget[]>({
@@ -156,6 +180,47 @@ export function useDeleteExpense() {
       qc.invalidateQueries({ queryKey: ["expenses"] });
       qc.invalidateQueries({ queryKey: ["budgets"] });
       qc.invalidateQueries({ queryKey: ["analytics"] });
+    },
+  });
+}
+
+// Template hooks
+export function useTemplates() {
+  return useQuery<ExpenseTemplate[]>({
+    queryKey: ["templates"],
+    queryFn: () => apiFetch("/api/templates"),
+  });
+}
+
+export function useCreateTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: TemplateInput) =>
+      apiFetch<ExpenseTemplate>("/api/templates", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["templates"] });
+    },
+  });
+}
+
+export function useUpdateTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: Partial<TemplateInput> & { id: number }) =>
+      apiFetch<ExpenseTemplate>(`/api/templates/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["templates"] });
+    },
+  });
+}
+
+export function useDeleteTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      apiFetch(`/api/templates/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["templates"] });
     },
   });
 }

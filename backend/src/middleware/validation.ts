@@ -32,6 +32,26 @@ export const updateExpenseSchema = z.object({
   budgetId: z.number().int().positive().optional(),
 });
 
+export const createTemplateSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  participante: z.string().optional(),
+  valor: z.number().positive("Valor must be positive").optional(),
+  local: z.string().optional(),
+  forecast: z.boolean().optional(),
+  categoria: z.string().optional(),
+  budgetId: z.number().int().positive().optional(),
+});
+
+export const updateTemplateSchema = z.object({
+  name: z.string().min(1).optional(),
+  participante: z.string().nullable().optional(),
+  valor: z.number().positive().nullable().optional(),
+  local: z.string().nullable().optional(),
+  forecast: z.boolean().nullable().optional(),
+  categoria: z.string().nullable().optional(),
+  budgetId: z.number().int().positive().nullable().optional(),
+});
+
 export function validate(schema: z.ZodSchema) {
   return (req: Request, _res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);

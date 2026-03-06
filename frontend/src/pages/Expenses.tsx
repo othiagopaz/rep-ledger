@@ -1,17 +1,22 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useExpenses, useBudgets, useCreateExpense, useUpdateExpense, useDeleteExpense } from "../hooks/useApi";
-import type { Expense, ExpenseInput } from "../hooks/useApi";
+import { useExpenses, useBudgets, useTemplates, useCreateTemplate, useUpdateTemplate, useDeleteTemplate, useCreateExpense, useUpdateExpense, useDeleteExpense } from "../hooks/useApi";
+import type { Expense, ExpenseInput, ExpenseTemplate } from "../hooks/useApi";
 import ExpenseForm from "../components/ExpenseForm";
+import TemplateManager from "../components/TemplateManager";
 
 type ViewMode = "all" | "actual" | "forecast";
 
 export default function Expenses() {
   const { data: expenses, isLoading } = useExpenses();
   const { data: budgets } = useBudgets();
+  const { data: templates } = useTemplates();
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
   const deleteExpense = useDeleteExpense();
+  const createTemplate = useCreateTemplate();
+  const updateTemplate = useUpdateTemplate();
+  const deleteTemplate = useDeleteTemplate();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const budgetFilter = searchParams.get("budgetId") ? Number(searchParams.get("budgetId")) : null;
@@ -21,6 +26,8 @@ export default function Expenses() {
   const [draftValues, setDraftValues] = useState<ExpenseInput | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("all");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   const filtered = useMemo(() => {
     if (!expenses) return [];
@@ -92,6 +99,22 @@ export default function Expenses() {
     updateExpense.mutate({ id: exp.id, forecast: !exp.forecast });
   };
 
+  const applyTemplate = (template: ExpenseTemplate) => {
+    const draft: ExpenseInput = {
+      participante: template.participante ?? "",
+      valor: template.valor ? Number(template.valor) : 0,
+      local: template.local ?? "",
+      forecast: template.forecast ?? false,
+      data: new Date().toISOString().split("T")[0],
+      categoria: template.categoria ?? "",
+      budgetId: template.budgetId ?? 0,
+    };
+    setDraftValues(draft);
+    setEditing(null);
+    setShowForm(true);
+    setShowDropdown(false);
+  };
+
   if (isLoading)
     return (
       <div className="flex justify-center py-20">
@@ -120,12 +143,60 @@ export default function Expenses() {
             </div>
           )}
         </div>
-        <button
-          onClick={() => { setShowForm(true); setEditing(null); setDraftValues(undefined); }}
-          className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700"
-        >
-          + Nova Despesa
-        </button>
+        <div className="relative">
+          <div className="flex">
+            <button
+              onClick={() => { setShowForm(true); setEditing(null); setDraftValues(undefined); }}
+              className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-l-lg hover:bg-brand-700"
+            >
+              + Nova Despesa
+            </button>
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="px-2 py-2 text-white bg-brand-600 rounded-r-lg hover:bg-brand-700 border-l border-brand-500"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {showDropdown && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+              <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+                {templates && templates.length > 0 && (
+                  <>
+                    <p className="px-3 py-1.5 text-xs font-medium text-gray-400 uppercase">Templates</p>
+                    {templates.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => applyTemplate(t)}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="truncate">{t.name}</span>
+                      </button>
+                    ))}
+                    <div className="border-t border-gray-100 my-1" />
+                  </>
+                )}
+                <button
+                  onClick={() => { setShowDropdown(false); setShowTemplateManager(true); }}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Gerenciar Templates
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Filters bar */}
@@ -171,11 +242,22 @@ export default function Expenses() {
 
       {/* Form modal */}
       {(showForm || editing) && budgets && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              {editing ? "Editar Despesa" : "Nova Despesa"}
-            </h2>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 pt-[10vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6 mb-8 relative">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                {editing ? "Editar Despesa" : "Nova Despesa"}
+              </h2>
+              <button
+                onClick={() => { setShowForm(false); setEditing(null); setDraftValues(undefined); }}
+                className="p-2 -mr-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                aria-label="Fechar"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             <ExpenseForm
               key={draftValues ? JSON.stringify(draftValues) : editing?.id ?? "new"}
               budgets={budgets}
@@ -210,6 +292,19 @@ export default function Expenses() {
             />
           </div>
         </div>
+      )}
+
+      {/* Template Manager modal */}
+      {showTemplateManager && budgets && (
+        <TemplateManager
+          templates={templates ?? []}
+          budgets={budgets}
+          onClose={() => setShowTemplateManager(false)}
+          onCreate={(data) => createTemplate.mutate(data)}
+          onUpdate={(data) => updateTemplate.mutate(data)}
+          onDelete={(id) => deleteTemplate.mutate(id)}
+          isLoading={createTemplate.isPending || updateTemplate.isPending}
+        />
       )}
 
       {/* Expenses table */}

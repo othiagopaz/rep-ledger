@@ -17,6 +17,7 @@ model Budget {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   expenses     Expense[]
+  templates    ExpenseTemplate[]
 
   @@map("budgets")
 }
@@ -37,4 +38,20 @@ model Expense {
   @@index([budgetId])
   @@index([createdAt])
   @@map("expenses")
+}
+
+model ExpenseTemplate {
+  id           Int      @id @default(autoincrement())
+  name         String
+  participante String?
+  valor        Decimal? @db.Decimal(10, 2)
+  local        String?
+  forecast     Boolean?
+  categoria    String?
+  budgetId     Int?     @map("budget_id")
+  budget       Budget?  @relation(fields: [budgetId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("expense_templates")
 }
