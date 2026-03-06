@@ -21,7 +21,7 @@ router.get(
 router.get(
   "/suggestions/:field",
   asyncHandler(async (req, res) => {
-    const field = req.params.field;
+    const field = req.params.field as string;
     const allowed = ["participante", "local", "categoria"];
     if (!allowed.includes(field)) {
       res.status(400).json({ error: "Invalid field. Must be one of: participante, local, categoria" });
