@@ -211,11 +211,11 @@ export default function Dashboard() {
                   fontSize={12}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-                    name === "actual" ? "Realizado" : "Previsto",
+                  formatter={(value: unknown, name: unknown) => [
+                    `R$ ${Number(value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+                    String(name) === "actual" ? "Realizado" : "Previsto",
                   ]}
-                  labelFormatter={(label: string) => new Date(label + "T12:00:00").toLocaleDateString("pt-BR")}
+                  labelFormatter={(label: unknown) => new Date(String(label) + "T12:00:00").toLocaleDateString("pt-BR")}
                 />
                 <Legend formatter={(value: string) => (value === "actual" ? "Realizado" : "Previsto")} />
                 <Bar dataKey="actual" fill="#10b981" name="actual" radius={[2, 2, 0, 0]} />
